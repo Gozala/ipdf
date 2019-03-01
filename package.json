@@ -5,6 +5,6 @@
   "license": "MIT",
   "dependencies": {
     "esm": "3.2.7",
-    "ipfs": "0.34.4"
+    "ipfs": "0.35.0-pre.0"
   }
 }
