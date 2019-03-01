@@ -1,0 +1,10 @@
+{
+  "name": "ipdf",
+  "version": "0.0.1",
+  "description": "Inter planetary Data Feed",
+  "license": "MIT",
+  "dependencies": {
+    "esm": "3.2.7",
+    "ipfs": "0.34.4"
+  }
+}
