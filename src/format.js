@@ -26,7 +26,7 @@ type Feed<a> = {
 
 type Block<a> = {
   links: CID<Feed<a>>[],
-  message: Encrypted<FollowerKey, Message<a>>
+  message: Encrypted<Message<a>, FollowerKey>
 }
 
 type Message<a> = {
@@ -34,13 +34,17 @@ type Message<a> = {
   content: a
 }
 
+type ConcatBuffer<parts> = Uint8Array
+
 type PrivateMessage<a> = {
   type: "private",
   head: SecretPublicKey,
-  body: [
-    Encrypted<BodyKey, SecretKey<SecretPrivateKey, RecepientKey>>[],
-    Encrypted<a, BodyKey>
-  ]
+  body: ConcatBuffer<
+    [
+      Encrypted<BodyKey, SecretKey<SecretPrivateKey, RecepientKey>>[],
+      Encrypted<a, BodyKey>
+    ]
+  >
 }
 
 type PublicMessage<a> = {
