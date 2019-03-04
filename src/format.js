@@ -1,6 +1,6 @@
 // @flow strict
 
-type CID<a> = {
+export type CID<a> = {
   decode(): Promise<a>
 }
 
@@ -9,7 +9,11 @@ type SecretPublicKey = Uint8Array
 type SecretPrivateKey = Uint8Array
 type BodyKey = Uint8Array
 type Signature = Uint8Array
-type Encrypted<data, key> = data
+
+export type Encoded<data, codec> = {
+  decode(codec): data
+}
+
 type ReplicatorKey = CryptoKey
 type FollowerKey = CryptoKey
 type RecepientKey = CryptoKey
@@ -18,33 +22,35 @@ type AuthorPrivateKey = CryptoKey
 
 type SecretKey<authorPrivateKey, recepientPublicKey> = CryptoKey
 
-type Feed<a> = {
+export type Head<a> = {
   author: AuthorPublicKey,
   signature: Signature,
-  block: Encrypted<Block<a>, ReplicatorKey>
+  block: Encoded<Block<a>, ReplicatorKey>
 }
 
-type Block<a> = {
-  links: CID<Feed<a>>[],
-  message: Encrypted<Message<a>, FollowerKey>
+export type Block<a> = {
+  links: CID<Head<a>>[],
+  message: Encoded<Message<a>, FollowerKey>
 }
 
-type Message<a> = {
-  previous: CID<Feed<a>>,
+export type Message<a> = {
+  previous: CID<Head<a>>,
   content: a
 }
-
-type ConcatBuffer<parts> = Uint8Array
 
 type PrivateMessage<a> = {
   type: "private",
   head: SecretPublicKey,
-  body: ConcatBuffer<
-    [
-      Encrypted<BodyKey, SecretKey<SecretPrivateKey, RecepientKey>>[],
-      Encrypted<a, BodyKey>
-    ]
-  >
+  // scalar multiplication is used to derive a shared secret for each recipient
+  // which is then used as to encrypt a `BodyKey` for each recepient.
+  // Each recepient will attempt to decode `BodyKey` by dervining shared secret
+  // using `SercetPublicKey` (in head attribute) and own private key. If
+  // successuful, recepient can decrypt content with it.
+  // -----
+  // Unlike SSB this doesn't actually attempts to conceal number of recepients
+  // which is not impossible just easier to do with raw buffers than with DAGs.
+  secrets: Encoded<BodyKey, SecretKey<SecretPrivateKey, RecepientKey>>[],
+  content: Encoded<a, BodyKey>
 }
 
 type PublicMessage<a> = {
@@ -52,4 +58,4 @@ type PublicMessage<a> = {
   body: a
 }
 
-type SSBLikeFeed<a> = Feed<PrivateMessage<a> | PublicMessage<a>>
+type SSBLikeFeed<a> = Head<PrivateMessage<a> | PublicMessage<a>>

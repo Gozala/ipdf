@@ -51,6 +51,10 @@ export interface PrivateKey {
   sign(data: Uint8Array, Callback<Error, Uint8Array>): void;
 }
 
+export interface CryptoKey {
+  bytes: Uint8Array;
+}
+
 export interface Crypto {
   sign(key: PrivateKey, message: Uint8Array): Promise<Uint8Array>;
   verify(
