@@ -15,7 +15,7 @@ If you care to provide feedabck [data format](https://github.com/gozala/ipdf/blo
 - Versioning for the data identifier (a.k.a mutable data).
 - Feed is signed and it's intergrity can be verified. (Each data block + link to the prior blocks is signed by an author allowing integrity checks)
   > There is a chance feed will be forked deliberetely or by an accident (e.g. bad migration to new device). Instead of treating such feed as corrupt we would allow user to choose between that or simply choosing a longer feed.
-- Feed id should be decoupled the feed. That would allow an author to share both:
+- Feed id should be decoupled from the feed. That would allow an author to share both:
   - Live feed that others can subscribe to.
   - Specific version of the feed without permission to subscribe to updates.
 - Key rotation. It should be possible to swap keys.

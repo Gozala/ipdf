@@ -3,6 +3,9 @@
   "version": "0.0.1",
   "description": "Inter planetary Data Feed",
   "license": "MIT",
+  "scripts": {
+    "repl": "node -e \"require('esm')(module)('./.repl.js');\" -i"
+  },
   "dependencies": {
     "esm": "3.2.7",
     "ipfs": "0.35.0-pre.0"

@@ -1,0 +1,11 @@
+// @flow strict
+
+export type Code = number
+export type Name = string
+
+declare export function addPrefix(prefix: Code | Name, data: Uint8Array): Buffer
+declare export function rmPrefix(prefixedData: Uint8Array): Buffer
+declare export function getCodec(prefixedData: Uint8Array): string
+
+declare export function getCodeVarint(name: Name): Buffer
+declare export function getVarint(code: Code): Buffer

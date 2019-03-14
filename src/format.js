@@ -1,40 +1,45 @@
 // @flow strict
 
-export type CID<a> = {
-  decode(): Promise<a>
-}
+/*::
+import type { CID } from "./data.js"
 
 type CryptoKey = Uint8Array
 type SecretPublicKey = Uint8Array
 type SecretPrivateKey = Uint8Array
 type BodyKey = Uint8Array
-type Signature = Uint8Array
+type Signature<data, privateKey> = Uint8Array
 
-export type Encoded<data, codec> = {
-  decode(codec): data
-}
+export opaque type Encoded<data, codec>:Uint8Array = Uint8Array
 
-type ReplicatorKey = CryptoKey
-type FollowerKey = CryptoKey
-type RecepientKey = CryptoKey
-type AuthorPublicKey = CryptoKey
-type AuthorPrivateKey = CryptoKey
+export type ReplicatorKey = CryptoKey
+export type SubscriberKey = CryptoKey
+export type RecepientKey = CryptoKey
+export type AuthorPublicKey = CryptoKey
+export type AuthorPrivateKey = CryptoKey
+export type NamePublicKey = CryptoKey
 
-type SecretKey<authorPrivateKey, recepientPublicKey> = CryptoKey
+export type SecretKey<authorPrivateKey, recepientPublicKey> = CryptoKey
+
 
 export type Head<a> = {
-  author: AuthorPublicKey,
-  signature: Signature,
+  signature: Signature<Encoded<Block<a>, ReplicatorKey>, AuthorPrivateKey>,
   block: Encoded<Block<a>, ReplicatorKey>
+}
+
+export type Root<a> = {
+  head:CID<Head<a>>,
+  author:AuthorPublicKey,
+  signature:Signature<NamePublicKey, AuthorPrivateKey>
 }
 
 export type Block<a> = {
   links: CID<Head<a>>[],
-  message: Encoded<Message<a>, FollowerKey>
+  message: Encoded<Message<a>, SubscriberKey>
 }
 
 export type Message<a> = {
   previous: CID<Head<a>>,
+  size: number,
   content: a
 }
 
@@ -59,3 +64,39 @@ type PublicMessage<a> = {
 }
 
 type SSBLikeFeed<a> = Head<PrivateMessage<a> | PublicMessage<a>>
+*/
+
+export const root = /*::<a>*/ (
+  head /*:CID<Head<a>>*/,
+  author /*:AuthorPublicKey*/,
+  signature /*:Signature<NamePublicKey, AuthorPrivateKey>*/
+) /*:Root<a>*/ => ({ head, author, signature })
+
+export const head = /*::<a>*/ (
+  block /*:Encoded<Block<a>, ReplicatorKey>*/,
+  signature /*:Signature<Encoded<Block<a>, ReplicatorKey>, AuthorPrivateKey>*/
+) /*:Head<a>*/ => {
+  return { block, signature }
+}
+
+export const block = /*::<a>*/ (
+  message /*:Encoded<Message<a>, SubscriberKey>*/,
+  head /*:?CID<Head<a>>*/
+) /*:Block<a>*/ => {
+  return {
+    links: head ? [head] : [],
+    message
+  }
+}
+
+export const message = /*::<a>*/ (
+  content /*:a*/,
+  size /*:number*/,
+  previous /*:CID<Head<a>>*/
+) /*:Message<a>*/ => {
+  return {
+    previous,
+    size,
+    content
+  }
+}

@@ -6,10 +6,11 @@ import type {
   Crypto,
   PrivateKey,
   PublicKey,
+  SecretKey,
   KeyType,
-  Callback
 } from "./data.js"
 */
+import { passback } from "./util.js"
 
 export default (libp2p$crypto /*:LibP2P$Crypto*/) /*:Crypto*/ =>
   new Libp2pCrypto(libp2p$crypto)
@@ -17,9 +18,14 @@ export default (libp2p$crypto /*:LibP2P$Crypto*/) /*:Crypto*/ =>
 class Libp2pCrypto /*::implements Crypto*/ {
   /*::
   provider:LibP2P$Crypto;
+  supportedKeyType:{[string]:KeyType}
   */
   constructor(provider) {
     this.provider = provider
+    this.supportedKeyType = {
+      ed25519: "ed25519",
+      RSA: "RSA"
+    }
   }
   randomBytes(size /*:number*/) {
     return this.provider.randomBytes(size)
@@ -34,7 +40,7 @@ class Libp2pCrypto /*::implements Crypto*/ {
   }
   generateKeyPairFromSeed(
     type /*: KeyType*/,
-    seed /*: ArrayBuffer*/,
+    seed /*: Uint8Array*/,
     size /*: number*/
   ) /*: Promise<PrivateKey>*/ {
     return passback(callback =>
@@ -70,17 +76,24 @@ class Libp2pCrypto /*::implements Crypto*/ {
   ) /*:Promise<Uint8Array>*/ {
     return passback(callback => privateKey.sign(data, callback))
   }
+  async encrypt(
+    data /*:Uint8Array*/,
+    nonce /*:Uint8Array*/,
+    secretKey /*:Uint8Array*/
+  ) /*:Promise<Uint8Array>*/ {
+    const key = await passback($ =>
+      this.provider.aes.create(secretKey, nonce, $)
+    )
+    return passback(callback => key.encrypt(data, callback))
+  }
+  async decrypt(
+    data /*:Uint8Array*/,
+    nonce /*:Uint8Array*/,
+    secretKey /*:Uint8Array*/
+  ) /*:Promise<Uint8Array>*/ {
+    const key = await passback($ =>
+      this.provider.aes.create(secretKey, nonce, $)
+    )
+    return passback(callback => key.decrypt(data, callback))
+  }
 }
-
-const passback = /*::<x, a>*/ (
-  call /*:(Callback<x, a>) => mixed*/
-) /*:Promise<a>*/ =>
-  new Promise((resolve, reject) => {
-    call((error, ok) => {
-      if (error) {
-        reject(error)
-      } else {
-        resolve(ok)
-      }
-    })
-  })
